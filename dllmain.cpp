@@ -10,7 +10,7 @@ FARPROC g_decodeAPI = NULL;
 /**
  * 通过读取导出表名称字符串来判断 是否是可可X DLL加载
  */
-BOOL isKssXLibrary(PVOID imageBase)
+BOOL isKssXLibrary(PVOID imageBase, SIZE_T &imageSize)
 {
 	PIMAGE_DOS_HEADER pDosHead = (PIMAGE_DOS_HEADER)imageBase;
 	if (pDosHead->e_magic != IMAGE_DOS_SIGNATURE) {
@@ -42,7 +42,11 @@ BOOL isKssXLibrary(PVOID imageBase)
 	if (_stricmp(nameString, KSSLIBRARY) != 0) {
 		return FALSE;
 	}
+
+	imageSize = pNtHead->OptionalHeader.SizeOfImage;
+
 	Log::Info("[%s] TRUE", __FUNCTION__);
+
 	return TRUE;
 }
 
@@ -55,6 +59,7 @@ fn_GetStartupInfoA pfn_GetStartupInfoA = NULL;
 VOID WINAPI HookedGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
 {
 	LPVOID returnAddr = _ReturnAddress();
+	SIZE_T imageSize = 0;
 
 	Log::Info("[%s] -> ReturnAddress = %08x", __FUNCTION__, returnAddr);
 
@@ -62,7 +67,7 @@ VOID WINAPI HookedGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
 	if (VirtualQuery(returnAddr, &mbi32, sizeof(mbi32))) {
 		Log::Info("[%s] Library -> ImageBase = %08x ", __FUNCTION__,mbi32.AllocationBase);
 
-		if (isKssXLibrary(mbi32.AllocationBase)) {
+		if (isKssXLibrary(mbi32.AllocationBase, imageSize)) {
 
 			MH_DisableHook(g_decodeAPI);
 			Log::Info("[%s] start hook ks_library exports function!", __FUNCTION__);
@@ -71,7 +76,7 @@ VOID WINAPI HookedGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
 			//开始hook函数
 			//
 
-			startHookKssX(mbi32.AllocationBase);
+			startHookKssX(mbi32.AllocationBase, imageSize);
 
 		}
 	}

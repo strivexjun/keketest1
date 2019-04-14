@@ -55,7 +55,7 @@ typedef struct _USER_PARAMENTERS
 #pragma pack(pop)
 
 extern
-VOID* WINAPI  startHookKssX(PVOID imageBase);
+VOID* WINAPI  startHookKssX(PVOID imageBase,SIZE_T imageSize);
 
 extern
 CHAR* WINAPI  hooked_ks_cmd(CHAR *cmdName, CHAR *cmdData);

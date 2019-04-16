@@ -29,7 +29,7 @@ fnhooked_FormatData pfnhooked_FormatData = NULL;
 //
 //开关模式，DLL注入后，用来获取数据还是用来破解？  1 = 调试数据  0 = 破解程序
 //
-#define		DEBUG_KSS_DATA		1
+#define		DEBUG_KSS_DATA		0
 
 //
 //开关模式，如果是C++的程序，C++版本需要hook类成员函数，麻烦的一逼，需要调试的数据的话 下面开启 1。 如果你是破解程序的话无视它
@@ -75,7 +75,14 @@ std::string g_announcementData =
 // 登录验证返回数据  randomstr需要自己处理下返回对应的
 ////////////////////////////////////////////////////////////////////////////////////
 std::string g_checkData =
-"<xml><state>100</state><message>验证通过</message><index>0</index><IsPubUser>0</IsPubUser><ShengYuMiaoShu>2006139</ShengYuMiaoShu><endtime>2066-06-06 16:16:16</endtime><shostname>http://www.crack666.com:6666</shostname><shosttime>1555218409</shosttime><unbind_changetime>0</unbind_changetime><YanZhengPinLv>15</YanZhengPinLv><InfoA>返回信息为A</InfoA><InfoB>返回信息为B</InfoB><username>ttkkM858Ga</username><linknum>1</linknum><cday>30.00</cday><points>0</points><bdinfo></bdinfo><tag>??????</tag><keyextattr></keyextattr><BeiZhu></BeiZhu><cztimes>1</cztimes><managerid>1</managerid><randomstr>%s</randomstr><pccode>1595106748~DESKTOP-NS8NRTF.0C9D92C2E494</pccode><SiYouShuJu></SiYouShuJu><keystr>ttkkM858GafG25i5Q32VFqM82651ZTQ8</keystr></xml>";
+"<xml><state>100</state><message>验证通过</message><index>0</index><IsPubUser>0</IsPubUser>"
+"<ShengYuMiaoShu>2006139</ShengYuMiaoShu><endtime>2066-06-06 16:16:16</endtime>"
+"<shostname>http://www.crack666.com:6666</shostname><shosttime>1555218409</shosttime>"
+"<unbind_changetime>0</unbind_changetime><YanZhengPinLv>15</YanZhengPinLv><InfoA>返回信息为A</InfoA>"
+"<InfoB>返回信息为B</InfoB><username>ttkkM858Ga</username><linknum>1</linknum><cday>30.00</cday>"
+"<points>0</points><bdinfo></bdinfo><tag>??????</tag><keyextattr></keyextattr><BeiZhu></BeiZhu>"
+"<cztimes>1</cztimes><managerid>1</managerid><randomstr>%s</randomstr>"
+"<pccode>1595106748~DESKTOP-NS8NRTF.0C9D92C2E494</pccode><SiYouShuJu></SiYouShuJu><keystr>ttkkM858GafG25i5Q32VFqM82651ZTQ8</keystr></xml>";
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +219,7 @@ VOID * WINAPI startHookKssX(PVOID imageBase, SIZE_T imageSize)
 }
 
 /**
- * Hook _FD取明码数据 C++版本需要hook类成员函数，麻烦的一逼
+ * Hook _FD取明码数据 C++版
  */
 class CSoftLicTool
 {
@@ -246,7 +253,7 @@ std::string CSoftLicTool::hooked_FD_(std::string &ioData)
 //std::string(CSoftLicTool:: *CSoftLicTool::Real_FD_)(std::string &ioData) = (std::string(CSoftLicTool::*)(std::string&))&CSoftLicTool::padding_FD_;
 
 /**
- * Hook _FD取明码数据
+ * Hook _FD取明码数据 易语言版
  */
 VOID WINAPI hooked_FormatData(CHAR** ioData)
 {
@@ -324,25 +331,6 @@ CHAR * WINAPI hooked_ks_cmd(CHAR * cmdName, CHAR * cmdData)
 			{
 				checkResult = FormatString(advapiFormat.c_str(), random.c_str(), "这里我们自定义返回 v_getb 接口的数据");//返回点数
 				result = (CHAR*)checkResult.c_str();
-			}
-			else if (_strnicmp(subString.c_str(), "v_52pj", strlen("v_52pj")) == 0)
-			{
-				checkResult = FormatString(advapiFormat.c_str(), random.c_str(), "DOCT/A9m98rZSTBFYifVrHm8qljpl1f2lRg7S+/NNLZ3E4BwtNdi/X/qxU9WMn/OOKiW66vQ80U6GKs4jumH51itDQGbid6EuqTRBvr4zPJmtf4/rNOOAT5QPT8UWxjt0Kc0gLZ/NfZe9dJUMGz8BiMANFhTeMFbwF8Bazm/HG4=");
-
-				result = (CHAR*)checkResult.c_str();
-
-				//
-				//开始Patch VMProtect RSA的模数
-				//
-
-				Log::Info("> 开始Patch VMProtect RSA N");
-
-				g_pHeapAlloc = GetProcAddress(GetModuleHandle("kernel32"), "HeapAlloc");
-
-				MH_CreateHook(g_pHeapAlloc, Jump, (PVOID*)&pfnHeapAlloc);
-
-				MH_EnableHook(g_pHeapAlloc);
-
 			}
 			else 
 			{
